@@ -1,33 +1,39 @@
-# ROCK 5T Ubuntu Focal XFCE Armbian Builder
+# ROCK 5T Ubuntu Jammy XFCE Armbian Builder
 
 Private GitHub Actions builder for Radxa ROCK 5T images.
 
-## Important finding
+## Decision
 
-The requested string `ubuntu_focal_desktop/server_xfce_linux6.1.43` was not found as a public ROCK 5T build target or release asset.
+The original `ubuntu_focal_desktop/server_xfce_linux6.1.43` target did not produce a usable ROCK 5T image in the current Armbian build stack because current Armbian package metadata no longer includes Ubuntu Focal `base-files` entries.
 
-Verified safe ROCK 5T source:
-
-- `armbian/build` has `config/boards/rock-5t.conf`
-- board: `rock-5t`
-- DTB: `rockchip/rk3588-rock-5t.dtb`
-- supported branches: `vendor,current`
-- Ubuntu Focal exists in Armbian distributions
-- XFCE desktop is selected with `BUILD_DESKTOP=yes DESKTOP_ENVIRONMENT=xfce`
-
-Kernel note:
-
-- Armbian `rockchip-rk3588` vendor branch currently tracks Linux `6.1.115`, not `6.1.43`.
-- Orange Pi `linux6.1.43` evidence was only found in Orange Pi/CM5-tablet-style configs, not ROCK 5T. Do not flash Orange Pi 5 Plus images to ROCK 5T.
-
-## Build
-
-Manual Actions dispatch defaults to a safe ROCK 5T image:
+This repo now defaults to a newer usable Ubuntu route:
 
 - `BOARD=rock-5t`
 - `BRANCH=vendor`
-- `RELEASE=focal`
+- `RELEASE=jammy`
 - `BUILD_DESKTOP=yes`
 - `DESKTOP_ENVIRONMENT=xfce`
+- `DESKTOP_TIER=mid`
 
-The produced `.img`/`.img.xz` files are uploaded as workflow artifacts.
+## Why this route
+
+Radxa's HDMI RX documentation expects the HDMI RX input to appear as a V4L2 video capture device, normally `/dev/video0`, driven by `rk_hdmirx` / Rockchip HDMI RX support. The current fnOS kernel on the target has the device tree node enabled but lacks the needed V4L2 platform / HDMI RX kernel options, so just replacing userland is not enough.
+
+Armbian `rock-5t` vendor builds are board-specific and include the RK3588 vendor kernel config with:
+
+- `CONFIG_V4L_PLATFORM_DRIVERS=y`
+- `CONFIG_VIDEO_ROCKCHIP_HDMIRX=y`
+
+That matches the HDMI RX requirement better than the current fnOS kernel.
+
+## Safety notes
+
+- Use only ROCK 5T board assets: `rock-5t`, `rk3588-rock-5t.dtb`.
+- Do not flash Orange Pi 5 Plus / ROCK 5B images to ROCK 5T just because they are RK3588 or mention Linux 6.1.
+- The vendor branch currently tracks a newer Rockchip 6.1 vendor kernel family, not the exact `6.1.43` string.
+
+## Build output
+
+The produced `.img` / `.img.xz` files are uploaded as GitHub Actions workflow artifacts named like:
+
+`rock5t-jammy-xfce-armbian-vendor`

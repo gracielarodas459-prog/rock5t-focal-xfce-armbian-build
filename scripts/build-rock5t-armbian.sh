@@ -3,7 +3,7 @@ set -euo pipefail
 
 BOARD="${BOARD:-rock-5t}"
 BRANCH="${BRANCH:-vendor}"
-RELEASE="${RELEASE:-focal}"
+RELEASE="${RELEASE:-jammy}"
 BUILD_DESKTOP="${BUILD_DESKTOP:-yes}"
 DESKTOP_ENVIRONMENT="${DESKTOP_ENVIRONMENT:-xfce}"
 DESKTOP_TIER="${DESKTOP_TIER:-mid}"
