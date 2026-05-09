@@ -1,0 +1,75 @@
+name: Build ROCK 5T Ubuntu Focal XFCE
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: Armbian kernel branch for rock-5t
+        required: true
+        default: vendor
+        type: choice
+        options:
+          - vendor
+          - current
+      release:
+        description: Ubuntu/Debian release
+        required: true
+        default: focal
+      desktop_environment:
+        description: Desktop environment
+        required: true
+        default: xfce
+      desktop_config:
+        description: Desktop config name
+        required: true
+        default: config_base
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+env:
+  BOARD: rock-5t
+  BRANCH: ${{ github.event.inputs.branch || 'vendor' }}
+  RELEASE: ${{ github.event.inputs.release || 'focal' }}
+  BUILD_DESKTOP: yes
+  DESKTOP_ENVIRONMENT: ${{ github.event.inputs.desktop_environment || 'xfce' }}
+  DESKTOP_ENVIRONMENT_CONFIG_NAME: ${{ github.event.inputs.desktop_config || 'config_base' }}
+  KERNEL_CONFIGURE: no
+  BUILD_MINIMAL: no
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 355
+    steps:
+      - name: Checkout builder repo
+        uses: actions/checkout@v4
+
+      - name: Free disk space
+        run: |
+          set -eux
+          df -h
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/lib/android /opt/hostedtoolcache || true
+          docker system prune -af || true
+          df -h
+
+      - name: Build ROCK 5T image
+        run: scripts/build-rock5t-armbian.sh
+
+      - name: List artifacts
+        if: always()
+        run: |
+          find . -maxdepth 4 -type f \( -path './artifacts/*' -o -path './armbian-build/output/images/*' \) -ls || true
+
+      - name: Upload image artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rock5t-focal-xfce-armbian-${{ env.BRANCH }}
+          path: |
+            artifacts/*
+            armbian-build/output/logs/**/*.log
+          if-no-files-found: warn
+          retention-days: 14
