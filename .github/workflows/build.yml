@@ -35,7 +35,7 @@ env:
   RELEASE: ${{ github.event.inputs.release || 'jammy' }}
   BUILD_DESKTOP: yes
   DESKTOP_ENVIRONMENT: ${{ github.event.inputs.desktop_environment || 'xfce' }}
-  DESKTOP_TIER: mid
+  DESKTOP_TIER: minimal
   DESKTOP_ENVIRONMENT_CONFIG_NAME: ${{ github.event.inputs.desktop_config || 'config_base' }}
   KERNEL_CONFIGURE: no
   BUILD_MINIMAL: no

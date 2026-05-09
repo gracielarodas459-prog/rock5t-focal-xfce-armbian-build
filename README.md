@@ -13,7 +13,7 @@ This repo now defaults to a newer usable Ubuntu route:
 - `RELEASE=jammy`
 - `BUILD_DESKTOP=yes`
 - `DESKTOP_ENVIRONMENT=xfce`
-- `DESKTOP_TIER=mid`
+- `DESKTOP_TIER=minimal`
 
 ## Why this route
 
